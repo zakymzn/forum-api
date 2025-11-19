@@ -3,11 +3,31 @@ const ClientError = require('../../Commons/exceptions/ClientError');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 const users = require('../../Interfaces/http/api/users');
 const authentications = require('../../Interfaces/http/api/authentications');
+const threads = require('../../Interfaces/http/api/threads');
 
 const createServer = async (container) => {
   const server = Hapi.server({
     host: process.env.HOST,
     port: process.env.PORT,
+  });
+
+  // register jwt plugin for authentication and app route plugins
+  await server.register(require('@hapi/jwt'));
+
+  // define JWT auth strategy immediately after plugin registration
+  const maxAge = Number(process.env.ACCESS_TOKEN_AGE) || 3600;
+  server.auth.strategy('forumapi_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: maxAge,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: { id: artifacts.decoded.payload.id },
+    }),
   });
 
   await server.register([
@@ -19,6 +39,10 @@ const createServer = async (container) => {
       plugin: authentications,
       options: { container },
     },
+    {
+      plugin: threads,
+      options: { container },
+    },
   ]);
 
   server.ext('onPreResponse', (request, h) => {
@@ -28,6 +52,16 @@ const createServer = async (container) => {
     if (response instanceof Error) {
       // bila response tersebut error, tangani sesuai kebutuhan
       const translatedError = DomainErrorTranslator.translate(response);
+
+      // handle authentication/authorization errors from hapi/jwt (Boom)
+      if (translatedError.isBoom && translatedError.output && translatedError.output.statusCode === 401) {
+        const newResponse = h.response({
+          status: 'fail',
+          message: translatedError.message || 'Missing authentication',
+        });
+        newResponse.code(401);
+        return newResponse;
+      }
 
       // penanganan client error secara internal.
       if (translatedError instanceof ClientError) {
@@ -56,6 +90,8 @@ const createServer = async (container) => {
     // jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
     return h.continue;
   });
+
+  
 
   return server;
 };
