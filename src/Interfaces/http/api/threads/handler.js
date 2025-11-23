@@ -32,7 +32,22 @@ class ThreadsHandler {
   }
 
   async postThreadCommentHandler(request, h) {
+    const AddThreadCommentUseCase = require('../../../../Applications/use_case/AddThreadCommentUseCase');
     const postThreadCommentUseCase = this._container.getInstance(AddThreadCommentUseCase.name);
+    const { threadId } = request.params;
+    const { content } = request.payload;
+    const owner = request.auth && request.auth.credentials ? request.auth.credentials.id : undefined;
+
+    const addedComment = await postThreadCommentUseCase.execute({ content, threadId, owner });
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        addedComment,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
   async deleteThreadCommentHandler(reqeust, h) {
