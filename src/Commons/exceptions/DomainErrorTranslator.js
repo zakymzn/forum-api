@@ -1,5 +1,6 @@
 const InvariantError = require('./InvariantError');
 const NotFoundError = require('./NotFoundError');
+const AuthorizationError = require('./AuthorizationError');
 
 const DomainErrorTranslator = {
   translate(error) {
@@ -17,6 +18,10 @@ DomainErrorTranslator._directories = {
   'ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat komentar karena properti yang dibutuhkan tidak ada'),
   'ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat komentar karena tipe data tidak sesuai'),
   'THREAD_NOT_FOUND': new NotFoundError('thread tidak ditemukan'),
+  'COMMENT_NOT_FOUND': new NotFoundError('komentar tidak ditemukan'),
+  'NOT_OWNER': new AuthorizationError('Anda tidak berhak menghapus komentar ini'),
+  'DELETE_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat menghapus komentar karena properti yang dibutuhkan tidak ada'),
+  'DELETE_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat menghapus komentar karena tipe data tidak sesuai'),
   'USER_LOGIN.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('harus mengirimkan username dan password'),
   'USER_LOGIN.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('username dan password harus string'),
   'REFRESH_AUTHENTICATION_USE_CASE.NOT_CONTAIN_REFRESH_TOKEN': new InvariantError('harus mengirimkan token refresh'),
