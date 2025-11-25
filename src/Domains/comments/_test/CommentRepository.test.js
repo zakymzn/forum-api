@@ -1,11 +1,35 @@
 const CommentRepository = require('../CommentRepository');
 
 describe('CommentRepository interface', () => {
-  it('should throw error when invoke abstract behavior', async () => {
+  it('should throw error when invoke addComment abstract behavior', async () => {
     // Arrange
     const commentRepository = new CommentRepository();
 
     // Action & Assert
     await expect(commentRepository.addComment({})).rejects.toThrowError('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  });
+
+  it('should throw error when invoke verifyCommentOwner abstract behavior', async () => {
+    // Arrange
+    const commentRepository = new CommentRepository();
+
+    // Action & Assert
+    await expect(commentRepository.verifyCommentOwner('comment-123', 'user-123')).rejects.toThrowError('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  });
+
+  it('should throw error when invoke deleteComment abstract behavior', async () => {
+    // Arrange
+    const commentRepository = new CommentRepository();
+
+    // Action & Assert
+    await expect(commentRepository.deleteComment('comment-123')).rejects.toThrowError('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  });
+
+  it('should throw error when invoke getCommentsByThreadId abstract behavior', async () => {
+    // Arrange
+    const commentRepository = new CommentRepository();
+
+    // Action & Assert
+    await expect(commentRepository.getCommentsByThreadId('thread-123')).rejects.toThrowError('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   });
 });
