@@ -39,6 +39,52 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       content: row.is_delete ? '**balasan telah dihapus**' : row.content,
     }));
   }
+
+  async verifyReplyOwner(replyId, owner) {
+    const query = {
+      text: 'SELECT owner FROM replies WHERE id = $1',
+      values: [replyId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      const error = new Error('REPLY_NOT_FOUND');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const reply = result.rows[0];
+    if (reply.owner !== owner) {
+      const error = new Error('NOT_OWNER');
+      error.statusCode = 403;
+      throw error;
+    }
+  }
+
+  async verifyReplyExist(replyId) {
+    const query = {
+      text: 'SELECT id FROM replies WHERE id = $1',
+      values: [replyId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      const error = new Error('REPLY_NOT_FOUND');
+      error.statusCode = 404;
+      throw error;
+    }
+  }
+
+  async deleteReply(replyId) {
+    const query = {
+      text: 'UPDATE replies SET is_delete = true WHERE id = $1',
+      values: [replyId],
+    };
+
+    await this._pool.query(query);
+  }
 }
 
 module.exports = ReplyRepositoryPostgres;
