@@ -152,3 +152,154 @@ afterAll(async () => {
   await server.stop();
   await pool.end();
 });
+
+describe('DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}', () => {
+  let accessToken;
+  let threadId;
+  let commentId;
+
+  beforeEach(async () => {
+    // add user
+    const userResponse = await server.inject({
+      method: 'POST',
+      url: '/users',
+      payload: {
+        username: 'dicoding',
+        password: 'secret_password',
+        fullname: 'Dicoding Indonesia',
+      },
+    });
+
+    // login user
+    const loginResponse = await server.inject({
+      method: 'POST',
+      url: '/authentications',
+      payload: {
+        username: 'dicoding',
+        password: 'secret_password',
+      },
+    });
+    accessToken = JSON.parse(loginResponse.payload).data.accessToken;
+
+    // add thread
+    const threadResponse = await server.inject({
+      method: 'POST',
+      url: '/threads',
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { title: 'sebuah thread', body: 'isi thread' },
+    });
+    threadId = JSON.parse(threadResponse.payload).data.addedThread.id;
+
+    // add comment
+    const commentResponse = await server.inject({
+      method: 'POST',
+      url: `/threads/${threadId}/comments`,
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { content: 'sebuah comment' },
+    });
+    commentId = JSON.parse(commentResponse.payload).data.addedComment.id;
+  });
+
+  afterEach(async () => {
+    await RepliesTableTestHelper.cleanTable();
+    await CommentsTableTestHelper.cleanTable();
+    await ThreadsTableTestHelper.cleanTable();
+    await AuthenticationsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
+  });
+
+  it('should response 200 when reply deleted by owner', async () => {
+    // create reply
+    const replyResponse = await server.inject({
+      method: 'POST',
+      url: `/threads/${threadId}/comments/${commentId}/replies`,
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { content: 'sebuah reply' },
+    });
+    const replyId = JSON.parse(replyResponse.payload).data.addedReply.id;
+
+    // delete reply
+    const response = await server.inject({
+      method: 'DELETE',
+      url: `/threads/${threadId}/comments/${commentId}/replies/${replyId}`,
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    const responseJson = JSON.parse(response.payload);
+    expect(response.statusCode).toEqual(200);
+    expect(responseJson.status).toEqual('success');
+  });
+
+  it('should response 403 when deleting by not owner', async () => {
+    // create reply by first user
+    const replyResponse = await server.inject({
+      method: 'POST',
+      url: `/threads/${threadId}/comments/${commentId}/replies`,
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { content: 'sebuah reply' },
+    });
+    const replyId = JSON.parse(replyResponse.payload).data.addedReply.id;
+
+    // create another user
+    await server.inject({
+      method: 'POST',
+      url: '/users',
+      payload: {
+        username: 'another',
+        password: 'secret_password',
+        fullname: 'Another User',
+      },
+    });
+
+    const loginResponse = await server.inject({
+      method: 'POST',
+      url: '/authentications',
+      payload: {
+        username: 'another',
+        password: 'secret_password',
+      },
+    });
+    const otherAccessToken = JSON.parse(loginResponse.payload).data.accessToken;
+
+    // attempt delete by other user
+    const response = await server.inject({
+      method: 'DELETE',
+      url: `/threads/${threadId}/comments/${commentId}/replies/${replyId}`,
+      headers: { authorization: `Bearer ${otherAccessToken}` },
+    });
+
+    const responseJson = JSON.parse(response.payload);
+    expect(response.statusCode).toEqual(403);
+    expect(responseJson.status).toEqual('fail');
+  });
+
+  it('should response 404 when reply not found', async () => {
+    const response = await server.inject({
+      method: 'DELETE',
+      url: `/threads/${threadId}/comments/${commentId}/replies/reply-invalid`,
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    const responseJson = JSON.parse(response.payload);
+    expect(response.statusCode).toEqual(404);
+    expect(responseJson.status).toEqual('fail');
+  });
+
+  it('should response 401 when not authenticated', async () => {
+    // create reply
+    const replyResponse = await server.inject({
+      method: 'POST',
+      url: `/threads/${threadId}/comments/${commentId}/replies`,
+      headers: { authorization: `Bearer ${accessToken}` },
+      payload: { content: 'sebuah reply' },
+    });
+    const replyId = JSON.parse(replyResponse.payload).data.addedReply.id;
+
+    const response = await server.inject({
+      method: 'DELETE',
+      url: `/threads/${threadId}/comments/${commentId}/replies/${replyId}`,
+    });
+
+    expect(response.statusCode).toEqual(401);
+  });
+});
