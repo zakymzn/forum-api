@@ -67,7 +67,6 @@ describe('ReplyRepositoryPostgres', () => {
 
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
 
-      // add a reply
       await replyRepositoryPostgres.addReply(addReply);
 
       // Action
@@ -96,8 +95,6 @@ describe('ReplyRepositoryPostgres', () => {
       // Arrange
       const fakeIdGenerator = () => '123';
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
-
-      // add a reply
       const addReply = new AddReply({
         content: 'sebuah reply',
         commentId: 'comment-123',
@@ -106,7 +103,6 @@ describe('ReplyRepositoryPostgres', () => {
       });
       const addedReply = await replyRepositoryPostgres.addReply(addReply);
 
-      // soft delete the reply
       await pool.query('UPDATE replies SET is_delete = true WHERE id = $1', [addedReply.id]);
 
       // Action

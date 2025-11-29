@@ -6,7 +6,6 @@ describe('a DeleteReply entities', () => {
     const payload = {
       threadId: 'thread-123',
       commentId: 'comment-123',
-      // replyId missing
       owner: 'user-123',
     };
 
@@ -17,10 +16,10 @@ describe('a DeleteReply entities', () => {
   it('should throw error when payload not meet data type specification', () => {
     // Arrange
     const payload = {
-      threadId: 123, // should be string
+      threadId: 123,
       commentId: 'comment-123',
       replyId: 'reply-123',
-      owner: {}, // should be string
+      owner: {},
     };
 
     // Action & Assert

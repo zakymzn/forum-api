@@ -62,8 +62,6 @@ describe('POST /threads/{threadId}/comments', () => {
     await UsersTableTestHelper.cleanTable();
   });
 
-  // keep server and pool lifecycle to file-level afterAll
-
   describe('when request valid', () => {
     it('should response 201 and persisted comment', async () => {
       // Action
@@ -197,10 +195,8 @@ describe('DELETE /threads/{threadId}/comments/{commentId}', () => {
     await UsersTableTestHelper.cleanTable();
   });
 
-  // lifecycle handled at file-level
-
   it('should response 200 when comment deleted by owner', async () => {
-    // create comment
+    // Arrange
     const commentResponse = await server.inject({
       method: 'POST',
       url: `/threads/${threadId}/comments`,
@@ -214,7 +210,7 @@ describe('DELETE /threads/{threadId}/comments/{commentId}', () => {
 
     const commentId = JSON.parse(commentResponse.payload).data.addedComment.id;
 
-    // delete comment
+    // Action
     const response = await server.inject({
       method: 'DELETE',
       url: `/threads/${threadId}/comments/${commentId}`,
@@ -223,13 +219,14 @@ describe('DELETE /threads/{threadId}/comments/{commentId}', () => {
       },
     });
 
+    // Assert
     const responseJson = JSON.parse(response.payload);
     expect(response.statusCode).toEqual(200);
     expect(responseJson.status).toEqual('success');
   });
 
   it('should response 403 when deleting by not owner', async () => {
-    // create comment by first user
+    // Arrange
     const commentResponse = await server.inject({
       method: 'POST',
       url: `/threads/${threadId}/comments`,
@@ -243,7 +240,6 @@ describe('DELETE /threads/{threadId}/comments/{commentId}', () => {
 
     const commentId = JSON.parse(commentResponse.payload).data.addedComment.id;
 
-    // create another user
     await server.inject({
       method: 'POST',
       url: '/users',
@@ -264,7 +260,7 @@ describe('DELETE /threads/{threadId}/comments/{commentId}', () => {
     });
     const otherAccessToken = JSON.parse(loginResponse.payload).data.accessToken;
 
-    // attempt delete by other user
+    // Action
     const response = await server.inject({
       method: 'DELETE',
       url: `/threads/${threadId}/comments/${commentId}`,
@@ -273,6 +269,7 @@ describe('DELETE /threads/{threadId}/comments/{commentId}', () => {
       },
     });
 
+    // Assert
     const responseJson = JSON.parse(response.payload);
     expect(response.statusCode).toEqual(403);
     expect(responseJson.status).toEqual('fail');

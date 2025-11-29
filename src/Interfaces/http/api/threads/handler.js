@@ -19,7 +19,6 @@ class ThreadsHandler {
 
   async postThreadHandler(request, h) {
     const addThreadUseCase = this._container.getInstance(AddThreadUseCase.name);
-    // owner is obtained from the access token (authentication credentials)
     const owner = request.auth && request.auth.credentials ? request.auth.credentials.id : undefined;
     const addedThread = await addThreadUseCase.execute({ ...request.payload, owner });
 

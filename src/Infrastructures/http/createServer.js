@@ -11,10 +11,8 @@ const createServer = async (container) => {
     port: process.env.PORT,
   });
 
-  // register jwt plugin for authentication and app route plugins
   await server.register(require('@hapi/jwt'));
 
-  // define JWT auth strategy immediately after plugin registration
   const maxAge = Number(process.env.ACCESS_TOKEN_AGE) || 3600;
   server.auth.strategy('forumapi_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
@@ -46,14 +44,11 @@ const createServer = async (container) => {
   ]);
 
   server.ext('onPreResponse', (request, h) => {
-    // mendapatkan konteks response dari request
     const { response } = request;
 
     if (response instanceof Error) {
-      // bila response tersebut error, tangani sesuai kebutuhan
       const translatedError = DomainErrorTranslator.translate(response);
 
-      // handle authentication/authorization errors from hapi/jwt (Boom)
       if (translatedError.isBoom && translatedError.output && translatedError.output.statusCode === 401) {
         const newResponse = h.response({
           status: 'fail',
@@ -63,7 +58,6 @@ const createServer = async (container) => {
         return newResponse;
       }
 
-      // penanganan client error secara internal.
       if (translatedError instanceof ClientError) {
         const newResponse = h.response({
           status: 'fail',
@@ -73,12 +67,10 @@ const createServer = async (container) => {
         return newResponse;
       }
 
-      // mempertahankan penanganan client error oleh hapi secara native, seperti 404, etc.
       if (!translatedError.isServer) {
         return h.continue;
       }
 
-      // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: 'error',
         message: 'terjadi kegagalan pada server kami',
@@ -87,11 +79,8 @@ const createServer = async (container) => {
       return newResponse;
     }
 
-    // jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
     return h.continue;
   });
-
-  
 
   return server;
 };

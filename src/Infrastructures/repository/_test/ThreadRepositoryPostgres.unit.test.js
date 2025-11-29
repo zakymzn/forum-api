@@ -3,7 +3,7 @@ const InvariantError = require('../../../Commons/exceptions/InvariantError');
 
 describe('ThreadRepositoryPostgres unit tests', () => {
   it('should throw InvariantError when addThread does not persist', async () => {
-    // Arrange: fake pool returning no rows
+    // Arrange
     const fakePool = {
       query: jest.fn().mockResolvedValue({ rowCount: 0, rows: [] }),
     };
@@ -14,11 +14,13 @@ describe('ThreadRepositoryPostgres unit tests', () => {
   });
 
   it('should throw THREAD_NOT_FOUND error when getThreadById not found', async () => {
+    // Arrange
     const fakePool = {
       query: jest.fn().mockResolvedValue({ rowCount: 0, rows: [] }),
     };
     const repo = new ThreadRepositoryPostgres(fakePool, () => '123');
 
+    // Action & Assert
     await expect(repo.getThreadById('thread-xyz')).rejects.toThrowError('THREAD_NOT_FOUND');
   });
 });

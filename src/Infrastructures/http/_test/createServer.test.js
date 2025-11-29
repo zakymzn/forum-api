@@ -22,7 +22,7 @@ describe('HTTP server', () => {
       fullname: 'Dicoding Indonesia',
       password: 'super_secret',
     };
-    const server = await createServer({}); // fake injection
+    const server = await createServer({});
 
     // Action
     const response = await server.inject({
@@ -42,73 +42,59 @@ describe('HTTP server', () => {
     // Arrange
     const server = await createServer({});
 
-    // Action - request to a valid endpoint that doesn't require auth
+    // Action
     const response = await server.inject({
       method: 'GET',
       url: '/unregisteredRoute',
     });
 
-    // Assert - the response should be 404 (not an error instance, but Hapi native response)
+    // Assert
     expect(response.statusCode).toEqual(404);
   });
 
   it('should handle generic server error that is not ClientError or 401 Boom error', async () => {
-    // This test covers the branch where we have an Error that:
-    // 1. Is instanceof Error (so it enters the error handler)
-    // 2. Is NOT a 401 Boom error
-    // 3. Is NOT a ClientError instance
-    // 4. Has isServer property set to true (generic error)
-    // The missing branch is: if (!translatedError.isServer) { return h.continue; } 
-    // when isServer is true (which executes the default 500 error handler)
-
+    // Arrange
     const server = await createServer({});
 
-    // Trigger an error that causes a generic server exception
-    // A POST to /users without proper container will fail validation
+    // Action
     const response = await server.inject({
       method: 'POST',
       url: '/users',
-      payload: {},  // Empty payload will fail validation
+      payload: {},
     });
 
-    // Assert - should return 500 server error
+    // Assert
     expect(response.statusCode).toEqual(500);
     const responseJson = JSON.parse(response.payload);
     expect(responseJson.status).toEqual('error');
   });
 
   it('should not process non-Error responses', async () => {
-    // This test covers the case where response instanceof Error is FALSE
-    // This should cause the extension to return h.continue without modification
-
+    // Arrange
     const server = await createServer({});
 
-    // A successful request should return 200 without being intercepted
-    // We'll use a request that would fail normally (POST with empty body)
-    // but will help us understand the flow
-
+    // Action
     const response = await server.inject({
       method: 'GET',
       url: '/unregisteredRoute',
     });
 
-    // Assert - Hapi's 404 should pass through
+    // Assert
     expect(response.statusCode).toEqual(404);
   });
 
   it('should handle response.code() chain properly', async () => {
-    // This test ensures all code paths in the response.code() handling are tested
-
+    // Arrange
     const server = await createServer({});
 
-    // Trigger a validation error on POST /users
+    // Action
     const response = await server.inject({
       method: 'POST',
       url: '/users',
-      payload: { username: 'validusername' },  // Missing required fields
+      payload: { username: 'validusername' },
     });
 
-    // This should trigger a ClientError that goes through response.code()
+    // Assert
     expect(response.statusCode).toBeGreaterThanOrEqual(400);
   });
 });
