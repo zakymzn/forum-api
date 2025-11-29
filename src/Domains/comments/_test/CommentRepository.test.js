@@ -25,6 +25,14 @@ describe('CommentRepository interface', () => {
     await expect(commentRepository.deleteComment('comment-123')).rejects.toThrowError('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   });
 
+  it('should throw error when invoke verifyCommentExist abstract behavior', async () => {
+    // Arrange
+    const commentRepository = new CommentRepository();
+
+    // Action & Assert
+    await expect(commentRepository.verifyCommentExist('comment-123')).rejects.toThrowError('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  });
+
   it('should throw error when invoke getCommentsByThreadId abstract behavior', async () => {
     // Arrange
     const commentRepository = new CommentRepository();

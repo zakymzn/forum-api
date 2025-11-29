@@ -57,7 +57,7 @@ const createServer = async (container) => {
       if (translatedError.isBoom && translatedError.output && translatedError.output.statusCode === 401) {
         const newResponse = h.response({
           status: 'fail',
-          message: translatedError.message || 'Missing authentication',
+          message: translatedError.message,
         });
         newResponse.code(401);
         return newResponse;
