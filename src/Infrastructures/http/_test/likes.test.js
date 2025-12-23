@@ -93,8 +93,9 @@ if (shouldRunLikesHttpTest) {
     });
 
     let responseJson = JSON.parse(response.payload);
-    expect(responseJson.data.comments).toHaveLength(1);
-    expect(responseJson.data.comments[0].likeCount).toEqual(0);
+    // the thread is returned under data.thread, and comments are nested there
+    expect(responseJson.data.thread.comments).toHaveLength(1);
+    expect(responseJson.data.thread.comments[0].likeCount).toEqual(0);
 
     // put like (add)
     response = await server.inject({
@@ -112,7 +113,7 @@ if (shouldRunLikesHttpTest) {
     // like count should be 1
     response = await server.inject({ method: 'GET', url: `/threads/${threadId}` });
     responseJson = JSON.parse(response.payload);
-    expect(responseJson.data.comments[0].likeCount).toEqual(1);
+    expect(responseJson.data.thread.comments[0].likeCount).toEqual(1);
 
     // put like again (remove)
     response = await server.inject({
@@ -130,7 +131,7 @@ if (shouldRunLikesHttpTest) {
     // like count should be back to 0
     response = await server.inject({ method: 'GET', url: `/threads/${threadId}` });
     responseJson = JSON.parse(response.payload);
-    expect(responseJson.data.comments[0].likeCount).toEqual(0);
+    expect(responseJson.data.thread.comments[0].likeCount).toEqual(0);
   });
 
   it('should response 401 when request not authenticated', async () => {

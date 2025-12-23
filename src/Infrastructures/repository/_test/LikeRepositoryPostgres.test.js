@@ -95,6 +95,9 @@ const shouldRunLikePostgresTest = !!process.env.CI;
 
     it('should return count correctly', async () => {
       // Arrange
+      // ensure users exist to satisfy foreign key constraint
+      await UsersTableTestHelper.addUser({ id: 'user-1', username: 'user1', password: 'secret', fullname: 'User One' });
+      await UsersTableTestHelper.addUser({ id: 'user-2', username: 'user2', password: 'secret', fullname: 'User Two' });
       await LikesTableTestHelper.addLike({ id: 'like-001', commentId: 'comment-123', owner: 'user-1' });
       await LikesTableTestHelper.addLike({ id: 'like-002', commentId: 'comment-123', owner: 'user-2' });
       const likeRepositoryPostgres = new LikeRepositoryPostgres(pool, () => '123');
