@@ -23,10 +23,13 @@ describe('GetThreadUseCase', () => {
       getReplyByCommentId: jest.fn().mockResolvedValue([]),
     };
 
+    const mockLikeRepository = { getLikeCountByCommentId: jest.fn().mockResolvedValue(0) };
+
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -78,10 +81,13 @@ describe('GetThreadUseCase', () => {
       ]),
     };
 
+    const mockLikeRepository = { getLikeCountByCommentId: jest.fn().mockResolvedValue(5) };
+
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -95,6 +101,8 @@ describe('GetThreadUseCase', () => {
     expect(thread.comments[0].id).toEqual('comment-123');
     expect(thread.comments[0].replies).toHaveLength(1);
     expect(thread.comments[0].replies[0].id).toEqual('reply-123');
+    expect(mockLikeRepository.getLikeCountByCommentId).toBeCalledWith('comment-123');
+    expect(thread.comments[0].likeCount).toEqual(5);
   });
 
   it('should throw error when thread not found', async () => {
@@ -113,10 +121,13 @@ describe('GetThreadUseCase', () => {
       getReplyByCommentId: jest.fn(),
     };
 
+    const mockLikeRepository = { getLikeCountByCommentId: jest.fn() };
+
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action & Assert
