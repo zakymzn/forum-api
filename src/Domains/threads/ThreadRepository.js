@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class ThreadRepository {
   // addThread should receive an AddThread entity (containing title, body, owner)
   async addThread(addThread) {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const createServer = require('../createServer');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const Hapi = require('@hapi/hapi');
 const ClientError = require('../../Commons/exceptions/ClientError');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');

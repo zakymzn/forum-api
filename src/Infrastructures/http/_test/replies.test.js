@@ -167,17 +167,6 @@ describe('DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}', ()
   let commentId;
 
   beforeEach(async () => {
-    // add user
-    const userResponse = await server.inject({
-      method: 'POST',
-      url: '/users',
-      payload: {
-        username: 'dicoding',
-        password: 'secret_password',
-        fullname: 'Dicoding Indonesia',
-      },
-    });
-
     // login user
     const loginResponse = await server.inject({
       method: 'POST',

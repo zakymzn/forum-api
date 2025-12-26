@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const pool = require('../../database/postgres/pool');
 const container = require('../../container');
 const createServer = require('../createServer');
